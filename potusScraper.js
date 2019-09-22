@@ -1,6 +1,7 @@
 /**
  * Bibliotecas necessárias para o Web Scraping
  */
+const { once } = require("events");
 const readline = require('readline');
 const rp = require('request-promise');
 const $ = require('cheerio');
@@ -27,7 +28,7 @@ function GetDomain(url) {
  * e nos retorna uma promise que tem a array dentro porque
  * Javascript
  * 
- * @param {String} url 
+ * @param {Promise} links, que contém os links do site  
  */
 function LinksToValues(url) {
 	return rp(url).then(function (html) {
@@ -64,20 +65,34 @@ function PageRank(sites) {
 	}
 }
 
+/* -- Flow principal da aplicação -- */
+
 let reader = readline.createInterface({
 	input: fs.createReadStream('properFile.csv')
 });
 
-let url = [];
-function wtf() {
-	let list = []
-	reader.on('line', function (line) {
-		list.push(line);
-	}).on('close', function (line) {
-		console.log(list);
-		return list;
-	})
+let url = []
+
+async function ExtractWebsitesFromFile() {
+	try {
+		let list = []
+		reader.on('line', function (line) {
+			list.push(line);
+		})
+
+		await once(reader, 'close')
+
+		console.log('File processed');
+		resolve( list)
+	} catch (err){
+		console.log(err);
+	}
 }
-url = wtf()
-console.log(url)
+
+async function main() {
+	let x = ExtractWebsitesFromFile();
+	console.log(x)
+	// PageRank(x);
+}
+main()
 //PageRank(url);
