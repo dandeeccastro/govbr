@@ -54,14 +54,18 @@ function PageRank(sites) {
 	console.log(sites.length)
 	let result = nj.zeros([sites.length, sites.length]);
 	for (let i = 0; i < sites.length; i++) {
-		LinksToValues(sites[i]).then(function (links) {
-			let value = 1 / links.length;
-			for (let site in links) {
-				console.log("Value " + value + "added to position " + (i, sites.indexOf(site)))
-				result[i][sites.indexOf(site)] = value;
-			}
+		try {
+			LinksToValues(sites[i])
+				.then(function (links) {
+					let value = 1 / links.length;
+					for (let site in links) {
+						console.log("Value " + value + " added to position " + (i, sites.indexOf(site)))
+						result[i][sites.indexOf(site)] = value;
+					}
+				})
+		} catch (err) {
+			console.log("Opa");
 		}
-		)
 	}
 }
 
@@ -79,20 +83,15 @@ async function ExtractWebsitesFromFile() {
 		reader.on('line', function (line) {
 			list.push(line);
 		})
-
-		await once(reader, 'close')
-
-		console.log('File processed');
-		resolve( list)
-	} catch (err){
+		await once(reader, 'close');
+		return list;
+	} catch (err) {
 		console.log(err);
 	}
 }
 
 async function main() {
-	let x = ExtractWebsitesFromFile();
-	console.log(x)
-	// PageRank(x);
+	let websites = await ExtractWebsitesFromFile()
+	PageRank(websites);
 }
 main()
-//PageRank(url);
