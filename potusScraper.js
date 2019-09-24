@@ -31,9 +31,11 @@ function GetDomain(url) {
  * @param {String} url, a url do site que se deseja saber para 
  * aonde aponta  
  */
-function LinksToValues(url) {
+async function LinksToValues(url) {
 	try {
-		rp(url).then(function (html) {
+		let response;
+		setTimeout(() => {throw new Error("Pelo amor de cristinho só vai"),2000});
+		response = await rp(url).then(function (html) {
 			let bundle = $('a', html);
 			let links = [];
 			for (let i = 0; i < bundle.length; i++) {
@@ -41,26 +43,22 @@ function LinksToValues(url) {
 					let res = bundle[i].attribs.href;
 					res = GetDomain(res);
 					if (res) {
-						// console.log(res)
-						if (!links.includes(res)) {
-							links.push(res);
-						}
+						if (!links.includes(res)) links.push(res);
 					}
 				}
 			}
 			return links;
 		})
+		return response;
 	}
 	catch (err) {
-		console.log('Opa');
+		console.log("Opa, esse site não existe mais!");
+		console.log("Erro: " + err)
 	}
 }
 /**
  * Pega uma série de sites dados e retorna uma matriz de Pagerank das conexões
  * entre elas
- * 
- * TODO: - variável links está retornando undefined, o que fazer
- * 	- Unhandled rejection RequestError
  * 
  * @param {Array} sites, um array de urls que serão checadas
  */
@@ -69,14 +67,17 @@ async function PageRank(sites) {
 	let result = nj.zeros([sites.length, sites.length]);
 	for (let i = 0; i < sites.length; i++) {
 		let links = await LinksToValues(sites[i]);
-		console.log(links);
-		let value = 1 / links.length;
+		let value;
+		if (links != null) {
+			if (links != []) value = 1 / links.length;
+		} else { value = 0; }
 		for (let site in links) {
+			if (!value) break;
 			console.log("Value " + value + " added to position " + (i, sites.indexOf(site)))
 			result[i][sites.indexOf(site)] = value;
 		}
-
 	}
+	return result;
 }
 
 let reader = readline.createInterface({
@@ -98,7 +99,31 @@ async function ExtractWebsitesFromFile() {
 
 async function main() {
 	let websites = await ExtractWebsitesFromFile()
-	PageRank(websites);
+	let matrix = await PageRank(websites);
+
+	console.log(matrix);
+}
+
+/**
+ * TODO: - Entender como corrida funciona em JS
+ */
+function RaceTest() {
+	let b = () => new Promise (resolve => 
+		setTimeout(resolve("Aff vai logo")),100);
+	let a = () => new Promise(resolve => 
+		setTimeout(resolve("Resposta do cálculo longo é 32!"), 3000));
+	
+	Promise.race([a, b].map(f => f())).then(console.log)
+	// let longTask = () => new Promise(resolve =>
+	// 	setTimeout(() => resolve("Long task complete."), 300))
+
+	// let timeout = (cb, interval) => () =>
+	// 	new Promise(resolve => setTimeout(() => cb(resolve), interval))
+
+	// let onTimeout = timeout(resolve =>
+	// 	resolve("The 'maybeLongTask' ran too long!"), 200)
+
+	// Promise.race([longTask, onTimeout].map(f => f())).then(console.log)
 }
 
 /* -- Flow principal da aplicação -- */
