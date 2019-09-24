@@ -10,7 +10,7 @@ const fs = require('fs');
 
 /**
  * Pega a url dada e retorna somente o domínio dela
- * @param {String} url 
+ * @param {String} url do site 
  */
 function GetDomain(url) {
 	let strings = url.split('/');
@@ -28,54 +28,60 @@ function GetDomain(url) {
  * e nos retorna uma promise que tem a array dentro porque
  * Javascript
  * 
- * @param {Promise} links, que contém os links do site  
+ * @param {String} url, a url do site que se deseja saber para 
+ * aonde aponta  
  */
 function LinksToValues(url) {
-	return rp(url).then(function (html) {
-		let bundle = $('a', html);
-		let links = [];
-		for (let i = 0; i < bundle.length; i++) {
-			if (bundle[i].attribs.href) {
-				let res = bundle[i].attribs.href;
-				res = GetDomain(res);
-				if (res) {
-					// console.log(res)
-					if (!links.includes(res)) {
-						links.push(res);
+	try {
+		rp(url).then(function (html) {
+			let bundle = $('a', html);
+			let links = [];
+			for (let i = 0; i < bundle.length; i++) {
+				if (bundle[i].attribs.href) {
+					let res = bundle[i].attribs.href;
+					res = GetDomain(res);
+					if (res) {
+						// console.log(res)
+						if (!links.includes(res)) {
+							links.push(res);
+						}
 					}
 				}
 			}
-		}
-		return links;
-	})
+			return links;
+		})
+	}
+	catch (err) {
+		console.log('Opa');
+	}
 }
-
-function PageRank(sites) {
+/**
+ * Pega uma série de sites dados e retorna uma matriz de Pagerank das conexões
+ * entre elas
+ * 
+ * TODO: - variável links está retornando undefined, o que fazer
+ * 	- Unhandled rejection RequestError
+ * 
+ * @param {Array} sites, um array de urls que serão checadas
+ */
+async function PageRank(sites) {
 	console.log(sites.length)
 	let result = nj.zeros([sites.length, sites.length]);
 	for (let i = 0; i < sites.length; i++) {
-		try {
-			LinksToValues(sites[i])
-				.then(function (links) {
-					let value = 1 / links.length;
-					for (let site in links) {
-						console.log("Value " + value + " added to position " + (i, sites.indexOf(site)))
-						result[i][sites.indexOf(site)] = value;
-					}
-				})
-		} catch (err) {
-			console.log("Opa");
+		let links = await LinksToValues(sites[i]);
+		console.log(links);
+		let value = 1 / links.length;
+		for (let site in links) {
+			console.log("Value " + value + " added to position " + (i, sites.indexOf(site)))
+			result[i][sites.indexOf(site)] = value;
 		}
+
 	}
 }
-
-/* -- Flow principal da aplicação -- */
 
 let reader = readline.createInterface({
 	input: fs.createReadStream('properFile.csv')
 });
-
-let url = []
 
 async function ExtractWebsitesFromFile() {
 	try {
@@ -94,4 +100,7 @@ async function main() {
 	let websites = await ExtractWebsitesFromFile()
 	PageRank(websites);
 }
+
+/* -- Flow principal da aplicação -- */
+
 main()
