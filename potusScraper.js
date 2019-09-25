@@ -7,6 +7,7 @@ const rp = require('request-promise');
 const $ = require('cheerio');
 const nj = require('numjs');
 const fs = require('fs');
+const ProgressBar = require('progress')
 
 /**
  * Pega a url dada e retorna somente o domínio dela
@@ -32,9 +33,9 @@ function GetDomain(url) {
  * aonde aponta  
  */
 async function LinksToValues(url) {
+	let response;
 	try {
-		let response;
-		setTimeout(() => {throw new Error("Pelo amor de cristinho só vai"),2000});
+		let time = setTimeout(() => {return []; }, 2000);
 		response = await rp(url).then(function (html) {
 			let bundle = $('a', html);
 			let links = [];
@@ -46,14 +47,14 @@ async function LinksToValues(url) {
 						if (!links.includes(res)) links.push(res);
 					}
 				}
-			}
+			} clearTimeout(time);
 			return links;
 		})
 		return response;
 	}
 	catch (err) {
-		console.log("Opa, esse site não existe mais!");
-		console.log("Erro: " + err)
+		// console.log("Opa, esse site não existe mais!");
+		// console.log("Erro: " + err)
 	}
 }
 /**
@@ -63,11 +64,14 @@ async function LinksToValues(url) {
  * @param {Array} sites, um array de urls que serão checadas
  */
 async function PageRank(sites) {
-	console.log(sites.length)
 	let result = nj.zeros([sites.length, sites.length]);
 	for (let i = 0; i < sites.length; i++) {
-		let links = await LinksToValues(sites[i]);
-		let value;
+		
+		let value, color;
+		let	links = await LinksToValues(sites[i]);	
+		if (links && links != []) value = 1/links.length;
+		else value = 0;
+		value ? color = "\x1b[32m" : color = "\x1b[31m"
 		if (links != null) {
 			if (links != []) value = 1 / links.length;
 		} else { value = 0; }
@@ -76,6 +80,7 @@ async function PageRank(sites) {
 			console.log("Value " + value + " added to position " + (i, sites.indexOf(site)))
 			result[i][sites.indexOf(site)] = value;
 		}
+		console.log(color, "Site " + (i+1) + " de " + sites.length);
 	}
 	return result;
 }
@@ -100,32 +105,8 @@ async function ExtractWebsitesFromFile() {
 async function main() {
 	let websites = await ExtractWebsitesFromFile()
 	let matrix = await PageRank(websites);
-
 	console.log(matrix);
 }
-
-/**
- * TODO: - Entender como corrida funciona em JS
- */
-function RaceTest() {
-	let b = () => new Promise (resolve => 
-		setTimeout(resolve("Aff vai logo")),100);
-	let a = () => new Promise(resolve => 
-		setTimeout(resolve("Resposta do cálculo longo é 32!"), 3000));
-	
-	Promise.race([a, b].map(f => f())).then(console.log)
-	// let longTask = () => new Promise(resolve =>
-	// 	setTimeout(() => resolve("Long task complete."), 300))
-
-	// let timeout = (cb, interval) => () =>
-	// 	new Promise(resolve => setTimeout(() => cb(resolve), interval))
-
-	// let onTimeout = timeout(resolve =>
-	// 	resolve("The 'maybeLongTask' ran too long!"), 200)
-
-	// Promise.race([longTask, onTimeout].map(f => f())).then(console.log)
-}
-
 /* -- Flow principal da aplicação -- */
 
 main()
