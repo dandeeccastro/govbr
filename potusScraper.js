@@ -21,7 +21,13 @@ function GetDomain(url) {
 			result = str;
 			break;
 		}
-	} return result;
+	} if (result) {
+		let test = result.split(".").slice(-3);
+		test = test.join(".")
+		console.log(test);
+		result = test;
+	}
+	return result;
 }
 
 /**
@@ -35,7 +41,7 @@ function GetDomain(url) {
 async function LinksToValues(url) {
 	let response;
 	try {
-		let time = setTimeout(() => {return []; }, 2000);
+		let time = setTimeout(() => { return []; }, 2000);
 		response = await rp(url).then(function (html) {
 			let bundle = $('a', html);
 			let links = [];
@@ -66,21 +72,24 @@ async function LinksToValues(url) {
 async function PageRank(sites) {
 	let result = nj.zeros([sites.length, sites.length]);
 	for (let i = 0; i < sites.length; i++) {
-		
+
 		let value, color;
-		let	links = await LinksToValues(sites[i]);	
-		if (links && links != []) value = 1/links.length;
+		let links = await LinksToValues(sites[i]);
+		if (links && links != []) value = 1 / links.length;
 		else value = 0;
-		value ? color = "\x1b[32m" : color = "\x1b[31m"
+		//value ? color = "\x1b[32m" : color = "\x1b[31m"
 		if (links != null) {
-			if (links != []) value = 1 / links.length;
+			if (links.length) value = 1 / links.length;
 		} else { value = 0; }
 		for (let site in links) {
 			if (!value) break;
-			console.log("Value " + value + " added to position " + (i, sites.indexOf(site)))
-			result[i][sites.indexOf(site)] = value;
+			let pos = sites.indexOf("https://" + site);
+			if (pos != -1) {
+				console.log("Value " + value + " added to position " + (i, pos))
+				result[i][pos] = value;
+			}
 		}
-		console.log(color, "Site " + (i+1) + " de " + sites.length);
+		console.log("Site " + (i + 1) + " de " + sites.length);
 	}
 	return result;
 }
