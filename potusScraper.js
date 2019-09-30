@@ -7,11 +7,10 @@ const rp = require('request-promise');
 const $ = require('cheerio');
 const nj = require('numjs');
 const fs = require('fs');
-const ProgressBar = require('progress')
 
 /**
  * Pega a url dada e retorna somente o domínio dela
- * @param {String} url do site 
+ * @param {String} url do site
  */
 function GetDomain(url) {
 	let strings = url.split('/');
@@ -34,9 +33,9 @@ function GetDomain(url) {
  * Pega a url dada, vê quais sites do governo ela aponta
  * e nos retorna uma promise que tem a array dentro porque
  * Javascript
- * 
- * @param {String} url, a url do site que se deseja saber para 
- * aonde aponta  
+ *
+ * @param {String} url, a url do site que se deseja saber para
+ * aonde aponta
  */
 async function LinksToValues(url) {
 	let response;
@@ -66,7 +65,7 @@ async function LinksToValues(url) {
 /**
  * Pega uma série de sites dados e retorna uma matriz de Pagerank das conexões
  * entre elas
- * 
+ *
  * @param {Array} sites, um array de urls que serão checadas
  */
 async function PageRank(sites) {
@@ -77,7 +76,6 @@ async function PageRank(sites) {
 		let links = await LinksToValues(sites[i]);
 		if (links && links != []) value = 1 / links.length;
 		else value = 0;
-		//value ? color = "\x1b[32m" : color = "\x1b[31m"
 		if (links != null) {
 			if (links.length) value = 1 / links.length;
 		} else { value = 0; }
@@ -85,11 +83,11 @@ async function PageRank(sites) {
 			if (!value) break;
 			let pos = sites.indexOf("https://" + site);
 			if (pos != -1) {
-				console.log("Value " + value + " added to position " + (i, pos))
+		//		console.log("Value " + value + " added to position " + (i, pos))
 				result[i][pos] = value;
 			}
 		}
-		console.log("Site " + (i + 1) + " de " + sites.length);
+//		console.log("Site " + (i + 1) + " de " + sites.length);
 	}
 	return result;
 }
