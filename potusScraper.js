@@ -40,7 +40,6 @@ function GetDomain(url) {
 async function LinksToValues(url) {
 	let response;
 	try {
-		let time = setTimeout(() => { return []; }, 2000);
 		response = await rp(url).then(function (html) {
 			let bundle = $('a', html);
 			let links = [];
@@ -72,7 +71,7 @@ async function PageRank(sites) {
 	let result = nj.zeros([sites.length, sites.length]);
 	for (let i = 0; i < sites.length; i++) {
 
-		let value, color;
+		let value;
 		let links = await LinksToValues(sites[i]);
 		if (links && links != []) value = 1 / links.length;
 		else value = 0;
@@ -83,11 +82,11 @@ async function PageRank(sites) {
 			if (!value) break;
 			let pos = sites.indexOf("https://" + site);
 			if (pos != -1) {
-		//		console.log("Value " + value + " added to position " + (i, pos))
+				console.log("Value " + value + " added to position " + (i, pos))
 				result[i][pos] = value;
 			}
 		}
-//		console.log("Site " + (i + 1) + " de " + sites.length);
+		console.log("Site " + (i + 1) + " de " + sites.length);
 	}
 	return result;
 }
@@ -110,10 +109,28 @@ async function ExtractWebsitesFromFile() {
 }
 
 async function main() {
+	nj.config.printThreshold = 2000;
 	let websites = await ExtractWebsitesFromFile()
 	let matrix = await PageRank(websites);
 	console.log(matrix);
 }
-/* -- Flow principal da aplicação -- */
 
-main()
+function teste(url) {
+	let p1 = new Promise ( resolve => {
+		setTimeout(resolve,1000,"Am good");
+	} )
+	let p2 = new Promise ( reject => {
+		setTimeout(reject,4000,"Am bad!");
+	})
+	Promise.race([p1,p2])
+	.then( res => {console.log(res)})
+	.catch( err => { console.log( err ) })
+}
+/* -- Flow principal da aplicação -- */
+teste("https://eletrosul.gov.br");
+/**
+	- Atualmente retorna um array de zeros!
+	- Faremos um teste controlado!
+	- Promise.race não impede a Promise lenta de rodar
+	- Plano: Tentar Observables
+*/
