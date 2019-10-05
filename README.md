@@ -30,6 +30,6 @@ Atualmente o projeto está com os seguintes problemas:
 
 ### TODO atual
 
-- [] Entender como Observables funcionam no RxJS, para reduzir o tempo de execução do projeto.
-- [] Consertar o algoritmo de Pagerank e fazer um teste controlado
-- [] Implementar a UI em Electron
+- [ ] Entender como Observables funcionam no RxJS, para reduzir o tempo de execução do projeto.
+- [ ] Consertar o algoritmo de Pagerank e fazer um teste controlado
+- [ ] Implementar a UI em Electron
