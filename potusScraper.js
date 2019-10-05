@@ -1,12 +1,15 @@
 /**
  * Bibliotecas necessárias para o Web Scraping
  */
+import { Observable } from rxjs;
+
 const { once } = require("events");
 const readline = require('readline');
 const rp = require('request-promise');
 const $ = require('cheerio');
 const nj = require('numjs');
 const fs = require('fs');
+
 
 /**
  * Pega a url dada e retorna somente o domínio dela
@@ -70,7 +73,6 @@ async function LinksToValues(url) {
 async function PageRank(sites) {
 	let result = nj.zeros([sites.length, sites.length]);
 	for (let i = 0; i < sites.length; i++) {
-
 		let value;
 		let links = await LinksToValues(sites[i]);
 		if (links && links != []) value = 1 / links.length;
@@ -115,19 +117,7 @@ async function main() {
 	console.log(matrix);
 }
 
-function teste(url) {
-	let p1 = new Promise ( resolve => {
-		setTimeout(resolve,1000,"Am good");
-	} )
-	let p2 = new Promise ( reject => {
-		setTimeout(reject,4000,"Am bad!");
-	})
-	Promise.race([p1,p2])
-	.then( res => {console.log(res)})
-	.catch( err => { console.log( err ) })
-}
 /* -- Flow principal da aplicação -- */
-teste("https://eletrosul.gov.br");
 /**
 	- Atualmente retorna um array de zeros!
 	- Faremos um teste controlado!
