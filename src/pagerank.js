@@ -1,3 +1,5 @@
+const math = require("mathjs");
+
 export class PageRankResource {
 	transformVector;
 	transformationMatrix;

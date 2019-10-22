@@ -5,7 +5,7 @@ import PageRankResource from "src/pagerank.js"
 function main(){
 	const precision = 1;
 
-	const file = new FileResource("assets/properFile.csv");
+	const file = new FileResource("/assets/properFile.csv");
 	const websiteList = file.ReadWebsiteListFromFile();
 	const web = new WebResource(websiteList);
 	const transformVector, graphMatrix = web.WebsiteListToGraphMatrix();
