@@ -29,9 +29,13 @@ def outputPageRankValue(matrix, precision):
         result = matrix.dot(result)
     return result
 
+def firstItem(elem):
+    return elem[0]
+
 def uniteValueToDomain(values, domains):
     result = list(map(lambda x,y:(x[0],y),values,domains))
-    return result
+    sorted_result = result.sort(key=firstItem)
+    return sorted_result
 
 if __name__ == '__main__':
     domain_list = gatherDomainsFromFile('websites.txt')
